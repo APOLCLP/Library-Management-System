@@ -14,3 +14,10 @@ all faculties are registered from the starting.
 
 
 error handling is only done when input in terminal is wrong
+constrainsts: dont give roll out of the range of signed int 
+
+U can check the datafiles for reference of the input
+
+U have to complete the session for updating things in datafiles
+
+, at last in df is necess

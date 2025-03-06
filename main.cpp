@@ -4,6 +4,7 @@
 #include "class.hpp"
 
 
+
 pair<char,int> take (string datatype){
     pair<char,int> result = {'0',0};
     bool option = datatype == "char" ? true : false;
@@ -68,13 +69,18 @@ int main(){
         // the input will be accepted if a number is given , else re-enter.
             
 
-        User U1;
+        User* U1 = nullptr;
         Student* St1 = nullptr;
         Faculty* Fc1 = nullptr;
         Librarian* Lb1 = nullptr;
 
+        string account_id; 
+        string account_password;
 
-        try {User U1(user_roll);}
+
+        U1 = new User(user_roll);
+
+        try {L.find_user(user_roll);}
         catch(const char* msg){
             cout << msg<< endl;
             goto EXIT;
@@ -84,21 +90,21 @@ int main(){
         
         TYPE :
 
-            getline(cin, U1.user_type);
+            getline(cin, U1->user_type);
             
-            if(U1.user_type == ""){
-                getline(cin, U1.user_type);
+            if(U1->user_type == ""){
+                getline(cin, U1->user_type);
             }
 
-            transform(U1.user_type.begin(), U1.user_type.end(), U1.user_type.begin(),  
+            transform(U1->user_type.begin(), U1->user_type.end(), U1->user_type.begin(),  
                 [](unsigned char c) { return toupper(c); });
-            U1.user_type.erase(remove_if(U1.user_type.begin(), U1.user_type.end(), 
-                [](char c) { return c == ' '; }), U1.user_type.end()); 
+            U1->user_type.erase(remove_if(U1->user_type.begin(), U1->user_type.end(), 
+                [](char c) { return c == ' '; }), U1->user_type.end()); 
 
 
-            if(U1.user_type == "STUDENT") goto STUDENT;
-            else if (U1.user_type == "FACULTY") goto FACULTY;
-            else if (U1.user_type == "LIBRARIAN") goto LIBRARIAN;
+            if(U1->user_type == "STUDENT") goto STUDENT;
+            else if (U1->user_type == "FACULTY") goto FACULTY;
+            else if (U1->user_type == "LIBRARIAN") goto LIBRARIAN;
 
             else { 
                 cout << "U have entered a wrong userTYPE. Pls, re-enter ur Preference."<< endl <<"      ---";
@@ -109,14 +115,14 @@ int main(){
         STUDENT:
         
             St1 = new Student();
-            goto PROFILE;
-            
-            // St1->user_roll = U1.user_roll;
-            
-            // if(St1->is_registered()){
-            //         goto PROFILE;
-            // }
-            // else //register
+           
+    
+            //St1->is_registered()
+            if(true){
+                *St1 = L.find_student(U1->user_roll);
+                goto PROFILE;
+            }
+            else //register
 
 
 
@@ -124,16 +130,30 @@ int main(){
 
             PROFILE:
             
-                *St1 = L.find_student(U1.user_roll);
-                cout <<"Would u want to check the books u borrowed? Y/n"<< endl <<"      ---";
+                cout << "\nType your Account details. "<<endl <<"      ID  ---";
+                cin >> account_id;
+                cout <<"      PASSWORD  ---";
+                cin >> account_password;
+
+                try{St1->verify_account(account_id,account_password);}
+                catch(const char* msg){
+                    cout << msg<< endl;
+                    goto PROFILE;
+                }
+
+
+                cout <<"\nWould u want to check the books u borrowed? Y/n"<< endl <<"      ---";
                 yesno = take("char").first;
                 if(yesno == 'Y' || yesno == 'y')St1->print_books();
 
                 if(St1->number_books_borrowed() == max_limit_St) {
-                    cout << "U have reached the maximum limit of books u can borrowed. \nWould u like to return any book? Y/n" << endl <<"      ---"; 
+                    cout << "\n !! U have reached the maximum limit of books u can borrowed !!\n \nWould u like to return any book? Y/n" << endl <<"      ---"; 
                     yesno = take("char").first;
-                    //if(yesno == 'Y' || yesno == 'y') goto RETURN;
+                    if(yesno == 'Y' || yesno == 'y') goto RETURN;
                 }
+
+            RETURN:
+                
 
 
                 // borrow books;
@@ -161,13 +181,13 @@ int main(){
 
 
     // User U1;
-    // try {U1.valid();}
+    // try {U1->valid();}
     // catch(...){
     //     goto end;
     // }
 
     EXIT : 
-        cout << "Thanks for the session."<< endl;
+        cout << "\nThanks for the session.\n"<< endl;
         delete St1;
         delete Fc1;
         delete Lb1;

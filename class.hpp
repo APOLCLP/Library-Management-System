@@ -12,25 +12,13 @@ int max_limit_Fc = 5;
 
 class User{
      
-        
-        //maybe i will use the type in the user class usefully.
-        //
-
     public:
         
         int user_roll;
         string user_type;
 
-        User(){};
-        User( int user_roll){
-            this->user_roll = user_roll;
-            if(true){ // check the criteria if he is registered or not
-                cout << "\n What do u recognize urself with ? \n     Student / Faculty / Librarian"<< endl << "      ---";
-            }
-            else{
-                throw "I am afraid u cant go further as u are not eligible to enter library.";
-                
-            } 
+        User(){}
+        User( int roll): user_roll(roll){       
         };
 
 
@@ -95,6 +83,11 @@ class Student : public User,private Account{
             this->account_password = password;
             
         }
+
+        void verify_account(string id, string password){
+            if(account_id == id && account_password == password) return;
+            else throw "U have entered wrong Account ID or password!";
+        }
         
         bool is_registered(){
             
@@ -105,15 +98,15 @@ class Student : public User,private Account{
         }
 
         void print_books(){   
-            int n = this->borrowed_books.size(); 
-            if(n==0)cout << "U haven't borrowed any book currently.";
-            while(n--){
-                cout << max_limit_St-n+1 << ".   " << borrowed_books[n-1].first << endl;
-
+            int size = this->borrowed_books.size(); 
+            if(size==0)cout << "U haven't borrowed any book currently.";
+            for(int i=0;i<size;i++){
+                cout << i+1<< ".   " << borrowed_books[i].first << endl;
             }
         }
         void add_books(pair<string,string> book){
-            int n = this->borrowed_books.size();
+            int size = this->borrowed_books.size();
+            if(size==max_limit_St) throw "U have to retursize first to gain one";
             this->borrowed_books.push_back(book);
         }
         void remove_books(){
@@ -129,16 +122,28 @@ class Faculty : public User, private Account{
             this->user_type = "Faculty";
         }
 
-        void print_books(){   
-            int n = this->borrowed_books.size(); 
-            while(n--){
-                cout << max_limit_Fc-n+1 << ".   " << borrowed_books[n-1].first << endl;
+        Faculty(int roll, string id, string password){
+            this->user_roll = roll;
+            this->account_id = id;
+            this->account_password = password;
+            
+        }
 
+        void verify_account(string id, string password){
+            if(account_id == id && account_password == password) return;
+            else throw "U have entered wrong Account ID or password!";
+        }
+        
+
+        void print_books(){   
+            int size = this->borrowed_books.size(); 
+            for(int i=0;i<size;i++){
+                cout << i+1<< ".   " << borrowed_books[i].first << endl;
             }
         }
         void add_books(pair<string,string> book){
-            int n = this->borrowed_books.size();
-            if(n==max_limit_Fc) throw "U have to return first to gain one";
+            int size = this->borrowed_books.size();
+            if(size==max_limit_Fc) throw "U have to return first to gain one";
             this->borrowed_books.push_back(book);
         }
         void remove_books(){
@@ -154,12 +159,6 @@ class Librarian : public User{
     }
     
 };
-
-
-
-
-
-
 
 class Library{
     vector<Book> library_books;
@@ -183,7 +182,7 @@ class Library{
                 U.user_type = "Student";
                 getline(ss,roll,',');
                 getline(ss,id,',');
-                getline(ss,password);
+                getline(ss,password,',');
                 
                 if(id != ""){
                     Student St(stoi(roll),id,password);
@@ -210,7 +209,7 @@ class Library{
                 getline(ss,author,',');
                 getline(ss,published_year,',');
                 getline(ss,publisher,',');
-                getline(ss,status);
+                getline(ss,status,',');
                 
 
                 
@@ -224,8 +223,9 @@ class Library{
 
 
             getline(file2,line);
-            int index_vector = 0;
+            
             while(getline(file2,line)){
+                int index_vector = 0;
                 stringstream ss(line);
 
                 getline(ss,roll,',');
@@ -247,44 +247,45 @@ class Library{
 
         
         }
+        bool search_roll(int roll){
+            int index = 0;
+            while(index < library_users.size() && roll != library_users[index].user_roll ) index++;
+            if(index==library_users.size())return false;
+            return true;
+        }
+         // check the criteria if he is registered or not
+        void find_user(int roll){
+            if(search_roll(roll)){ 
+                cout << "\n What do u recognize urself with ? \n     Student / Faculty / Librarian"<< endl << "      ---";
+            }
+            else{
+                throw "I am afraid u cant go further as u are not eligible to enter library.";
+                
+            }
+            
+        }
 
         Student find_student(int roll){
             int index = 0;
-            while(roll != library_students[index].user_roll && index < library_students.size()) index++;
-            // int low_index = 0;
-            // int high_index = library_students.size()-1;
-            // int ans_index =0;
-
-            // while(low_index<=high_index){
-            //     int mid_index = (low_index + high_index)/2;
-            //     cout << mid_index;
-            //     if(roll<library_students[mid_index].user_roll) high_index  = mid_index-1;
-            //     else if (roll>library_students[mid_index].user_roll) low_index  = mid_index+1;
-            //     else {ans_index = mid_index; break;}
-            // }
-            
-
+            while(index < library_students.size() && roll != library_students[index].user_roll ) index++;
+    
             return library_students[index];
         }
 
 
-
-
-
-
-        
-        void print_data(){
-            int count =0;
-            for(auto it: library_users){
-                cout << it.user_roll<< " ";
-                count++;
-            }cout << count;
-        }
         void output_data(){
 
         }
 
 };
+
+
+
+
+
+
+
+
 
 
 
