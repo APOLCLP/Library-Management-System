@@ -21,3 +21,14 @@ U can check the datafiles for reference of the input
 U have to complete the session for updating things in datafiles
 
 , at last in df is necess
+
+
+Lets suppose the book is borrowed then a second person can make it reserve so he can access it after the book is returned.
+he has to be notified about the book return
+
+
+U can borrow a returned book in the same session as a mistake or vice-versa.
+
+I have worked in this code like no 2 same books are present, if u add any book,be sure to search it first.IF u add some book in data file ensure to write proper full name.
+
+new students can register account, it is assumed that all faculties and librarian have an account already.  
