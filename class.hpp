@@ -30,10 +30,11 @@ class Account{
         string account_id;
         string account_password;
         vector<pair<string,string>> borrowed_books;
-        int overdue_days;
+        vector<int> overdues;
 
     public : 
 
+    
 
 
 };
@@ -43,7 +44,7 @@ class Book{
         string title; 
         string ISBN;
         string author;
-        int published_year;
+        string published_year;
         string publisher;
         
     public:
@@ -54,7 +55,7 @@ class Book{
         Book(string title, 
             string ISBN,
             string author,
-            int published_year,
+            string published_year,
             string publisher,string status){
                 this->title = title;
                 this->author = author;
@@ -102,14 +103,18 @@ class Student : public User,private Account{
             
         }
 
-        void verify_account(string id, string password){
-            if(account_id == id && account_password == password) return;
-            else throw "U have entered wrong Account ID or password!";
+        bool verify_account(string id, string password){
+            if(account_id == id && account_password == password) return true;
+            else {
+                cout <<"U have entered wrong Account ID or password!";
+                return false;
+            }
         }
         
-        bool is_registered(){
-            
+        int return_days(int index){
+            return overdues[index];
         }
+    
 
         int number_books_borrowed(){
             return this->borrowed_books.size();
@@ -118,17 +123,25 @@ class Student : public User,private Account{
         void print_books(){   
             int size = this->borrowed_books.size(); 
             if(size==0)cout << "U haven't borrowed any book currently.";
+            int total_fine =0;
+            
             for(int i=0;i<size;i++){
-                cout << i+1<< ".   " << borrowed_books[i].first << endl;
+                int fine = 0;
+                if(overdues[i] > 15) fine = (overdues[i] - 15) *10; 
+                cout << i+1<< ".   " << borrowed_books[i].first << "          Days Borrowed: "<< overdues[i] << "     OverdueFine: Rs. " << fine<<endl;
+                total_fine+=fine;
             }
+            cout << "\nTotal Overdue Fine :       Rs. " << total_fine <<endl;
         }
-        void add_book(pair<string,string> book){
+        void add_book(pair<string,string> book,int days){
             int size = this->borrowed_books.size();
-            if(size==max_limit_St) throw "U have to retursize first to gain one";
+
             this->borrowed_books.push_back(book);
+            this->overdues.push_back(days);
         }
         void remove_book(int index){
-            borrowed_books.erase(borrowed_books.begin() + index);  
+            borrowed_books.erase(borrowed_books.begin() + index);
+            overdues.erase(overdues.begin()+ index);  
         }
         int check_book(string title) {
             int size = this->borrowed_books.size();
@@ -161,25 +174,59 @@ class Faculty : public User, private Account{
             
         }
 
-        void verify_account(string id, string password){
-            if(account_id == id && account_password == password) return;
-            else throw "U have entered wrong Account ID or password!";
+        int number_books_borrowed(){
+            return this->borrowed_books.size();
         }
+        int return_days(int index){
+            return overdues[index];
+        }
+    
+        bool verify_account(string id, string password){
+            if(account_id == id && account_password == password) return true;
+            else {
+                cout <<"U have entered wrong Account ID or password!";
+                return false;
+            }
+        }
+        
         
 
         void print_books(){   
             int size = this->borrowed_books.size(); 
+            if(size==0)cout << "U haven't borrowed any book currently.";
+            
+            
             for(int i=0;i<size;i++){
-                cout << i+1<< ".   " << borrowed_books[i].first << endl;
+                cout << i+1<< ".   " << borrowed_books[i].first <<"          Days Borrowed: "<< overdues[i] <<endl;
+                
             }
+           
         }
-        void add_books(pair<string,string> book){
+
+        void add_book(pair<string,string> book,int days){
             int size = this->borrowed_books.size();
-            if(size==max_limit_Fc) throw "U have to return first to gain one";
+            
             this->borrowed_books.push_back(book);
+            this->overdues.push_back(days);
         }
-        void remove_books(){
-            this->borrowed_books.pop_back();
+        void remove_book(int index){
+            borrowed_books.erase(borrowed_books.begin() + index);
+            overdues.erase(overdues.begin()+ index);   
+        }
+
+        int check_book(string title) {
+            int size = this->borrowed_books.size();
+            int index = 0;
+        
+            while (index < size && this->borrowed_books[index].first != title) 
+                index++;
+        
+            if (index == size) return -1;  // Book not found
+            return index;  // Found at index
+        }
+        
+        string give_ISBN(int index){
+            return borrowed_books[index].second;
         }
     
 };
@@ -200,109 +247,190 @@ class Library{
 
     public:
         
-        void input_data(){
-            //users
-            ifstream file("users.csv");
+    
+    
+    
+    
+    void input_data() {
+        string line, roll, id, password,days;
+    
+        // --- Process students.csv ---
+        ifstream file("students.csv");
+        if (!file) {
+            cout << "Error opening students.csv" << endl;
+            return;
+        }
+        // Skip header
+        getline(file, line);
+        while (getline(file, line)) {
+            stringstream ss(line);
+            User U;
+            U.user_type = "Student";
+            getline(ss, roll, ',');
+            getline(ss, id, ',');
+            getline(ss, password, ',');
             
-
-            string line,roll,id,password;
-
-            getline(file,line);
-            while (getline(file, line)) {
-                stringstream ss(line);
-
-                User U;
-                U.user_type = "Student";
-                getline(ss,roll,',');
-                getline(ss,id,',');
-                getline(ss,password,',');
-                
-                if(id != ""){
-                    Student St(stoi(roll),id,password);
+            if(id!="" && password!=""){
+                    int roll_num = stoi(roll);
+                    Student St(roll_num, id, password);
                     library_students.push_back(St);
-                }
-
-                U.user_roll = stoi(roll);
-                library_users.push_back(U);
             }
-
-            file.close(); 
-
-            //books
-            ifstream file1("books.csv");
-
-            string  title,ISBN,author,published_year,publisher,status;
-            getline(file1,line);
-            while (getline(file1, line)) {
-                stringstream ss(line);
-
-                
-                getline(ss,title,',');
-                getline(ss,ISBN,',');
-                getline(ss,author,',');
-                getline(ss,published_year,',');
-                getline(ss,publisher,',');
-                getline(ss,status,',');
-                
-
-                
-                Book B(title,ISBN,author,stoi(published_year),publisher,status);
-                library_books.push_back(B);
-            }
-            file1.close();
-
-            // borrowed_books
-            ifstream file2("users_books.csv");
-
-
-            getline(file2,line);
             
-            while(getline(file2,line)){
-                int index_vector = 0;
-                stringstream ss(line);
-
-                getline(ss,roll,',');
+                    U.user_roll = stoi(roll);
+               
+            library_users.push_back(U);
+        }
+        file.close();
+    
+        // --- Process faculties.csv ---
+        ifstream file8("faculties.csv");
+        if (!file8) {
+            cout << "Error opening faculties.csv" << endl;
+            return;
+        }
+        getline(file8, line);
+        while (getline(file8, line)) {
+            stringstream ss(line);
+            User U;
+            U.user_type = "Faculty";
+            getline(ss, roll, ',');
+            getline(ss, id, ',');
+            getline(ss, password, ',');
+            
+            
+                    int roll_num = stoi(roll);
+                    Faculty Fc(roll_num, id, password);
+                    library_faculties.push_back(Fc);
                 
-                while(library_students[index_vector].user_roll != stoi(roll))index_vector++;
-
-                while(getline(ss,title,',')){
+            
+                    U.user_roll = stoi(roll);
+                
+            library_users.push_back(U);
+        }
+        file8.close();
+    
+        // --- Process books.csv ---
+        ifstream file1("books.csv");
+        if (!file1) {
+            cerr << "Error opening books.csv" << endl;
+            return;
+        }
+        string title, ISBN, author, published_year, publisher, status;
+        getline(file1, line);
+        while (getline(file1, line)) {
+            stringstream ss(line);
+            getline(ss, title, ',');
+            getline(ss, ISBN, ',');
+            getline(ss, author, ',');
+            getline(ss, published_year, ',');
+            getline(ss, publisher, ',');
+            getline(ss, status, ',');
+            
+            
+            
                     
-                    getline(ss,ISBN,',');
-                    
-                    library_students[index_vector].add_book({title,ISBN});
+                
+            Book B(title, ISBN, author, published_year, publisher, status);
+            library_books.push_back(B);
+        }
+        file1.close();
+    
+        // --- Process distributed_books.csv (borrowed_books) ---
+        ifstream file2("distributed_books.csv");
+        if (!file2) {
+            cerr << "Error opening distributed_books.csv" << endl;
+            return;
+        }
+        getline(file2, line);
+        while (getline(file2, line)) {
+            int index_vector = 0;
+            stringstream ss(line);
+            getline(ss, roll, ',');
+            
+            if(roll == "Roll No" || roll =="")continue;
+            int roll_num = 0;
+            
+            roll_num = stoi(roll);
+                
+            
+            // Try to find a matching student
+            bool found_student = false;
+            for (size_t i = 0; i < library_students.size(); i++) {
+                if (library_students[i].user_roll == roll_num) {
+                    index_vector = i;
+                    found_student = true;
+                    break;
                 }
-                
-                
             }
-            file2.close();
+            if (found_student) {
+                while (getline(ss, title, ',')) {
+                    
+                    getline(ss, ISBN, ',');
+                    
+                    getline(ss,days,',');
+                    if(ISBN =="")continue;
+                    if(days=="")days ="0";
+                    library_students[index_vector].add_book({title, ISBN},stoi(days));
+                }
+            } else {
+                // If not found among students, try faculties
+                bool found_faculty = false;
+                for (size_t i = 0; i < library_faculties.size(); i++) {
+                    if (library_faculties[i].user_roll == roll_num) {
+                        index_vector = i;
+                        found_faculty = true;
+                        break;
+                    }
+                }
+                if (found_faculty) {
+                    while (getline(ss, title, ',')) {
+                        getline(ss, ISBN, ',');
+                        getline(ss,days,',');
+                        if(ISBN =="")continue;
+                        if(days=="")days ="0";
+                        library_faculties[index_vector].add_book({title, ISBN},stoi(days));
+                    }
+                } else {
+                    cout << "Roll number " << roll_num << " not found among students or faculties." << endl;
+                }
+             }
+        }
+        file2.close();
+    }
 
 
 
         
-        }
+        
         bool search_roll(int roll){
             int index = 0;
             while(index < library_users.size() && roll != library_users[index].user_roll ) index++;
             if(index==library_users.size())return false;
             return true;
         }
+
          // check the criteria if he is registered or not
-        void find_user(int roll){
+        bool find_user(int roll){
             if(search_roll(roll)){ 
                 cout << "\n What do u recognize urself with ? \n     Student / Faculty / Librarian"<< endl << "      ---";
+                return true;
             }
             else{
-                throw "I am afraid u cant go further as u are not eligible to enter library.";
+                cout<< "I am afraid u cant go further as u are not eligible to enter library.";
+                return false;
                 
             }
             
         }
 
-        void print_books(){
+        bool print_books(){
             int index = 0;
             int sub_index = 1;
             int size = library_books.size();
-            if(size == 0)  throw "\nNo books are currently available !!\n"; 
+            if(size == 0) {
+                cout<< "\nNo books are currently available !!\n"; 
+                return false;
+            } 
             while( index < size ){
                 if(library_books[index].status == "Available"){
                     cout << sub_index<< ".   " << library_books[index].print_title() << endl;
@@ -310,6 +438,7 @@ class Library{
                 }
                 index++;
             }
+            return true;
         }
         string check_book_ISBN(string title){
             int index = 0;
@@ -333,10 +462,19 @@ class Library{
             return &library_students[index];
         }
 
+        Faculty* find_faculty(int roll){
+            int index = 0;
+            while(index < library_faculties.size() && roll != library_faculties[index].user_roll ) index++;
+            if(index == library_faculties.size()) return nullptr;
+    
+            return &library_faculties[index];
+
+        }
+
 
         
         void output_data_register(int roll_no, string new_ID, string new_password) {
-            ifstream file_in("users.csv");
+            ifstream file_in("students.csv");
             ostringstream updated_data;
             string line, roll;
             bool updated = false;
@@ -354,14 +492,14 @@ class Library{
             file_in.close();
         
             if (updated) {
-                ofstream("users.csv") << updated_data.str();
+                ofstream("students.csv") << updated_data.str();
                 cout << "Account registered successfully." << endl;
             }
         }
 
        
-        void borrow_book(int roll_no, const string& book_title, const string& isbn) {
-            ifstream file_in("users_books.csv");
+        void borrow_book(int roll_no, const string& book_title, const string& isbn,int days) {
+            ifstream file_in("distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
             bool found = false, book_updated = false;
@@ -372,11 +510,23 @@ class Library{
             while (getline(file_in, line)) {
                 stringstream ss(line);
                 getline(ss, roll, ',');
+                
         
                 if (!roll.empty() && isdigit(roll[0]) && stoi(roll) == roll_no) {
+                    vector<string> items;
+                    string item;
+                    while (getline(ss, item, ',')) {
+                        if (!item.empty()) items.push_back(item);
+                    }
+                    updated_data <<roll;
+                    for (size_t i = 0; i < items.size(); i += 1) {                
+                        updated_data  <<","<< items[i];
+                    }
                     // Append new book and ISBN to this user's row
-                    updated_data << line.substr(0, line.size() - 1)  // Remove trailing comma
-                                 << book_title << "," << isbn << ",";  // Append new data
+                    updated_data << ","<< book_title << "," << isbn << ","<<"0";
+                    int comma_count = item.size() +4;
+                    updated_data << string(16 - comma_count, ',') ;
+
                     found = true;
                 } else {
                     updated_data << line;  // Keep other rows unchanged
@@ -387,11 +537,15 @@ class Library{
         
             // If roll number was not found, add a new row for this user
             if (!found) {
-                updated_data << roll_no << "," << book_title << "," << isbn << "\n";
+                updated_data << roll_no << "," << book_title << "," << isbn << ","<< "0"<<",";
+                int comma_count = 4;
+                updated_data << string(16 - comma_count, ',') ;
+                updated_data << "\n";
+
             }
         
             // Rewrite the file with updated data
-            ofstream file_out("users_books.csv", ios::trunc);
+            ofstream file_out("distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
@@ -431,9 +585,9 @@ class Library{
         }
 
 
-        void return_book(int roll_no, const string& book_title, const string& isbn) {
+        void return_book(int roll_no, const string& book_title, const string& isbn,const int& days) {
             // Update user_books.csv
-            ifstream file_in("users_books.csv");
+            ifstream file_in("distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
             bool found = false;
@@ -450,16 +604,21 @@ class Library{
                     vector<string> items;
                     string item;
                     while (getline(ss, item, ',')) {
-                        items.push_back(item);
+                        if(!item.empty())items.push_back(item);
                     }
         
                     updated_data << roll;
-                    for (size_t i = 0; i < items.size(); i += 2) {
-                        if (items[i] != book_title || items[i+1] != isbn) {
-                            updated_data << "," << items[i] << "," << items[i+1];
+                    for (size_t i = 0; i < items.size(); i += 3) {
+                        if (items[i+1] == isbn ) {
+                            continue;
+                        } else {
+                            updated_data << "," << items[i] << "," << items[i + 1] << "," << items[i + 2];
                         }
                     }
-                    updated_data << ",\n";
+                    int comma_count = items.size()-3;
+                    updated_data << string(16 - comma_count, ',') ;
+
+                    updated_data << "\n";
                 } else {
                     updated_data << line << "\n";
                 }
@@ -471,7 +630,7 @@ class Library{
                 return;
             }
         
-            ofstream file_out("users_books.csv", ios::trunc);
+            ofstream file_out("distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
@@ -516,17 +675,6 @@ class Library{
         
 
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -31,4 +31,10 @@ U can borrow a returned book in the same session as a mistake or vice-versa.
 
 I have worked in this code like no 2 same books are present, if u add any book,be sure to search it first.IF u add some book in data file ensure to write proper full name.
 
-new students can register account, it is assumed that all faculties and librarian have an account already.  
+students can register for an account(if not registered before),it is assumed that all faculties and librarian have an account already.  
+
+I have restraint a student to be roll having 5 digits and faculty to be having 3 digits.
+
+password should not contains white spaces.
+any book or publication should not have "," in between ,try to replace it with "-".
+u can pay ur fines while returning the book , by entering the amount.
