@@ -3,11 +3,11 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <ctime>
 using namespace std;
 
 int max_limit_St = 3;
 int max_limit_Fc = 5;
-
 
 
 class User{
@@ -23,7 +23,7 @@ class User{
 
 
 
-};
+    };
 
 class Account{
     protected : 
@@ -31,8 +31,12 @@ class Account{
         string account_password;
         vector<pair<string,string>> borrowed_books;
         vector<int> overdues;
+        
 
     public : 
+    
+
+    
 
     
 
@@ -93,6 +97,7 @@ class Book{
 class Student : public User,private Account{
     
     public:
+        vector<string> borrowing_history ;
         Student(){
             this->user_type = "Student";
         }
@@ -100,13 +105,19 @@ class Student : public User,private Account{
             this->user_roll = roll;
             this->account_id = id;
             this->account_password = password;
+            this->user_type = "Student";
             
+        }
+        void browse(){
+            for(auto it : borrowing_history){
+                cout <<"        "<< it <<endl;
+            }
         }
 
         bool verify_account(string id, string password){
             if(account_id == id && account_password == password) return true;
             else {
-                cout <<"U have entered wrong Account ID or password!";
+                cout <<" You have entered wrong Account ID or password!";
                 return false;
             }
         }
@@ -114,24 +125,40 @@ class Student : public User,private Account{
         int return_days(int index){
             return overdues[index];
         }
+        bool fine(){
+            bool pay = false;
+            for(int i=0;i<overdues.size();i++){
+                if(overdues[i]>15)pay = true;
+            }
+
+            return pay;
+        }
     
 
         int number_books_borrowed(){
             return this->borrowed_books.size();
         }
+        
 
         void print_books(){   
             int size = this->borrowed_books.size(); 
-            if(size==0)cout << "U haven't borrowed any book currently.";
+            if(size==0)cout << " You haven't borrowed any book currently.";
             int total_fine =0;
-            
+            bool fine_or_not = false;
             for(int i=0;i<size;i++){
                 int fine = 0;
-                if(overdues[i] > 15) fine = (overdues[i] - 15) *10; 
-                cout << i+1<< ".   " << borrowed_books[i].first << "          Days Borrowed: "<< overdues[i] << "     OverdueFine: Rs. " << fine<<endl;
+                 
+                cout << i+1<< ".   " << borrowed_books[i].first << "          Days Borrowed: "<< overdues[i] << endl;
+                if(overdues[i] > 15){
+                    fine_or_not = true;
+                    fine = (overdues[i] - 15) *10;
+                    cout<< "You have borrowed this book for "<<overdues[i] - 15<<" Overdue days. You have to pay ---     OverdueFine: Rs. " << fine<<endl;
+                } 
                 total_fine+=fine;
+
+
             }
-            cout << "\nTotal Overdue Fine :       Rs. " << total_fine <<endl;
+            if(fine_or_not)cout << "\nTotal Overdue Fine :       Rs. " << total_fine <<endl;
         }
         void add_book(pair<string,string> book,int days){
             int size = this->borrowed_books.size();
@@ -153,6 +180,8 @@ class Student : public User,private Account{
             if (index == size) return -1;  // Book not found
             return index;  // Found at index
         }
+
+        
         
         string give_ISBN(int index){
             return borrowed_books[index].second;
@@ -163,6 +192,7 @@ class Student : public User,private Account{
 
 class Faculty : public User, private Account{
     public:
+        vector<string> borrowing_history;
         Faculty(){
             this->user_type = "Faculty";
         }
@@ -171,7 +201,14 @@ class Faculty : public User, private Account{
             this->user_roll = roll;
             this->account_id = id;
             this->account_password = password;
+            this->user_type = "Faculty";
             
+        }
+
+        void browse(){
+            for(auto it : borrowing_history){
+                cout <<"        "<< it <<endl;
+            }
         }
 
         int number_books_borrowed(){
@@ -180,11 +217,19 @@ class Faculty : public User, private Account{
         int return_days(int index){
             return overdues[index];
         }
+        bool fine(){
+            bool pay = false;
+            for(int i=0;i<overdues.size();i++){
+                if(overdues[i]>60)pay = true;
+            }
+
+            return pay;
+        }
     
         bool verify_account(string id, string password){
             if(account_id == id && account_password == password) return true;
             else {
-                cout <<"U have entered wrong Account ID or password!";
+                cout <<" You have entered wrong Account ID or password!";
                 return false;
             }
         }
@@ -193,12 +238,14 @@ class Faculty : public User, private Account{
 
         void print_books(){   
             int size = this->borrowed_books.size(); 
-            if(size==0)cout << "U haven't borrowed any book currently.";
+            if(size==0)cout << " You haven't borrowed any book currently.";
             
             
             for(int i=0;i<size;i++){
                 cout << i+1<< ".   " << borrowed_books[i].first <<"          Days Borrowed: "<< overdues[i] <<endl;
-                
+                if(overdues[i] >30){
+                    cout<< "You have borrowed this book for "<<overdues[i] - 30<<" Overdue days."<<endl;
+                }
             }
            
         }
@@ -232,30 +279,49 @@ class Faculty : public User, private Account{
 };
 
 class Librarian : public User{
+    private:
+        string access_key;
     public:
     Librarian(){
         this->user_type = "Librarian";
     }
-    
+    Librarian(int roll, string key){
+        this->user_roll = roll;
+        this->access_key = key;
+        this->user_type = "Librarian";
+
+    }
+
+    bool verify_account(string key){
+        if(access_key==key) return true;
+        else {
+            cout <<" You have entered wrong Access Key!";
+            return false;
+        }
+    }
 };
 
 class Library{
     vector<Book> library_books;
     vector<Student> library_students;
     vector<Faculty> library_faculties;
+    vector<Librarian> librarians;
     vector<User> library_users;
 
     public:
-        
-    
+    //register   
+    void add_student(int roll, string id,string password){
+        Student St(roll,id,password);
+        library_students.push_back(St);
+    }
     
     
     
     void input_data() {
-        string line, roll, id, password,days;
+        string line, roll, id, password,days,access_key,history;
     
         // --- Process students.csv ---
-        ifstream file("students.csv");
+        ifstream file("dataset/students.csv");
         if (!file) {
             cout << "Error opening students.csv" << endl;
             return;
@@ -269,12 +335,31 @@ class Library{
             getline(ss, roll, ',');
             getline(ss, id, ',');
             getline(ss, password, ',');
+            getline(ss,history);
             
             if(id!="" && password!=""){
                     int roll_num = stoi(roll);
                     Student St(roll_num, id, password);
+                    
+                    if(history != "[]"){
+                        string title = "";
+                        for(auto it : history){
+                            if(it == '['||it == ']'||it == '\"')continue;
+                            if(it!=',')title+=it;
+                            if(it==','){
+                                
+                                St.borrowing_history.push_back(title);
+                                title = "";
+                            }
+
+                        }
+                       
+                    }
                     library_students.push_back(St);
+                   
             }
+
+            
             
                     U.user_roll = stoi(roll);
                
@@ -283,7 +368,7 @@ class Library{
         file.close();
     
         // --- Process faculties.csv ---
-        ifstream file8("faculties.csv");
+        ifstream file8("dataset/faculties.csv");
         if (!file8) {
             cout << "Error opening faculties.csv" << endl;
             return;
@@ -296,10 +381,25 @@ class Library{
             getline(ss, roll, ',');
             getline(ss, id, ',');
             getline(ss, password, ',');
+            getline(ss,history);
             
             
                     int roll_num = stoi(roll);
                     Faculty Fc(roll_num, id, password);
+                    if(history != "[]"){
+                        string title = "";
+                        for(auto it : history){
+                            if(it == '['||it == ']'||it == '\"')continue;
+                            if(it!=',')title+=it;
+                            if(it==','){
+                                
+                                Fc.borrowing_history.push_back(title);
+                                title = "";
+                            }
+
+                        }
+                       
+                    }
                     library_faculties.push_back(Fc);
                 
             
@@ -308,9 +408,33 @@ class Library{
             library_users.push_back(U);
         }
         file8.close();
+
+        ifstream file9("dataset/librarian.csv");
+        if (!file9) {
+            cout << "Error opening librarian.csv" << endl;
+            return;
+        }
+        // Skip header
+        getline(file9, line);
+        while (getline(file9, line)) {
+            stringstream ss(line);
+            User U;
+            U.user_type = "Librarian";
+            getline(ss, roll, ',');
+            getline(ss, access_key, ',');
+            
+            
+                    int roll_num = stoi(roll);
+                    Librarian Lb(roll_num, access_key);
+                    librarians.push_back(Lb);
+                    U.user_roll = stoi(roll);
+               
+            library_users.push_back(U);
+        }
+        file9.close();
     
         // --- Process books.csv ---
-        ifstream file1("books.csv");
+        ifstream file1("dataset/books.csv");
         if (!file1) {
             cerr << "Error opening books.csv" << endl;
             return;
@@ -336,7 +460,7 @@ class Library{
         file1.close();
     
         // --- Process distributed_books.csv (borrowed_books) ---
-        ifstream file2("distributed_books.csv");
+        ifstream file2("dataset/distributed_books.csv");
         if (!file2) {
             cerr << "Error opening distributed_books.csv" << endl;
             return;
@@ -412,11 +536,23 @@ class Library{
          // check the criteria if he is registered or not
         bool find_user(int roll){
             if(search_roll(roll)){ 
-                cout << "\n What do u recognize urself with ? \n     Student / Faculty / Librarian"<< endl << "      ---";
+                cout << "\n What do You recognize yourself with ? \n     Student / Faculty / Librarian"<< endl << "      ---";
                 return true;
             }
             else{
-                cout<< "I am afraid u cant go further as u are not eligible to enter library.";
+                cout<< "I am afraid You cant go further as You are not eligible to enter library.";
+                return false;
+                
+            }
+            
+        }
+        bool unfind_user(int roll){
+            if(!search_roll(roll)){ 
+                cout << "\n What will be the usertype ? \n     Student / Faculty / Librarian"<< endl << "      ---";
+                return true;
+            }
+            else{
+                cout<< "This user is already eligible to enter the Library";
                 return false;
                 
             }
@@ -444,7 +580,7 @@ class Library{
             int index = 0;
             while(index < library_books.size() && title != library_books[index].print_title() ) index++;
             if(index == library_books.size()) return "NIL";
-            if(library_books[index].status == "BORROWED") return "B"+library_books[index].show_ISBN();
+            if(library_books[index].status == "Borrowed" ||library_books[index].status == "Reserved" ) return "B"+library_books[index].show_ISBN();
             return library_books[index].show_ISBN();
         }
         Book* find_book(string ISBN){
@@ -471,10 +607,18 @@ class Library{
 
         }
 
+        Librarian* find_librarian(int roll){
+            int index = 0;
+            while(index < librarians.size() && roll != librarians[index].user_roll ) index++;
+            if(index == librarians.size()) return nullptr;
+    
+            return &librarians[index];
+        }
+
 
         
         void output_data_register(int roll_no, string new_ID, string new_password) {
-            ifstream file_in("students.csv");
+            ifstream file_in("dataset/students.csv");
             ostringstream updated_data;
             string line, roll;
             bool updated = false;
@@ -492,14 +636,14 @@ class Library{
             file_in.close();
         
             if (updated) {
-                ofstream("students.csv") << updated_data.str();
+                ofstream("dataset/students.csv") << updated_data.str();
                 cout << "Account registered successfully." << endl;
             }
         }
 
        
         void borrow_book(int roll_no, const string& book_title, const string& isbn,int days) {
-            ifstream file_in("distributed_books.csv");
+            ifstream file_in("dataset/distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
             bool found = false, book_updated = false;
@@ -545,12 +689,12 @@ class Library{
             }
         
             // Rewrite the file with updated data
-            ofstream file_out("distributed_books.csv", ios::trunc);
+            ofstream file_out("dataset/distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
             // Update book status in books.csv (this part is unchanged)
-            ifstream book_file("books.csv");
+            ifstream book_file("dataset/books.csv");
             ostringstream book_data;
             string title, book_isbn, author, year, publisher, status;
         
@@ -577,20 +721,214 @@ class Library{
             book_file.close();
         
             if (book_updated) {
-                ofstream book_out("books.csv", ios::trunc);
+                ofstream book_out("dataset/books.csv", ios::trunc);
                 book_out << book_data.str();
                 book_out.close();
                 cout << "Book borrowed successfully." << endl;
             }
         }
+        void output_add_student(int roll){
+            ofstream file("dataset/students.csv", ios::app); // Open file in append mode
+
+        
+            file << to_string(roll)<<",,,\n";
+            file.close();
+            cout << "User added successfully.\n";
+        }
+        void output_add_faculty(int roll,string id,string password){
+            ofstream file("dataset/faculties.csv", ios::app); // Open file in append mode
+
+        
+            file << to_string(roll)<<","<<id<<","<<password<<",\n";
+            file.close();
+            cout << "User added successfully.\n";
+        }
+        void output_add_librarian(int roll,string key){
+            ofstream file("dataset/librarian.csv", ios::app); // Open file in append mode
+
+        
+            file << to_string(roll)<<","<<key<<",\n";
+            file.close();
+            cout << "User added successfully.\n";
+        }
+
+
+
+        void add_book( string title, 
+            string ISBN,
+            string author,
+            string published_year,
+            string publisher,string status){
+            
+            Book B(title, 
+                ISBN,
+                author,
+                published_year,
+                publisher,status);
+            library_books.push_back(B);
+
+
+            ofstream file("dataset/books.csv", ios::app); // Open file in append mode
+
+        
+            file << title<<","<<ISBN<<","<<author<<","<<published_year<<","<<publisher<<","<<status<<",\n"; // Append a new line
+            file.close();
+            cout << "Book added successfully.\n";
+        
+        }
+
+        void change_stats(string stats,string title ){
+            ifstream file_in("dataset/books.csv");
+
+            ostringstream updated_data;
+            string line, word;
+            bool found = false;
+
+            // Read and keep the header line
+            getline(file_in, line);
+            updated_data << line << "\n";
+
+            // Process each row
+            while (getline(file_in, line)) {
+                stringstream ss(line);
+                vector<string> columns;
+                
+                while (getline(ss, word, ',')) {
+                    columns.push_back(word);
+                }
+
+                if (columns.size() >= 6 && columns[0] == title) {
+                    columns[5] = stats; // Update the "Status" column
+                    found = true;
+                }
+
+                // Reconstruct the modified row
+                for (size_t i = 0; i < columns.size(); ++i) {
+                    updated_data << columns[i]<<",";
+                }
+                updated_data << "\n";
+            }
+
+            file_in.close();
+
+            if (!found) {
+                cout << "Book with Title " << title << " not found!" << endl;
+                return;
+            }
+
+            // Write back updated data
+            ofstream file_out("dataset/books.csv", ios::trunc);
+            file_out << updated_data.str();
+            file_out.close();
+
+            cout << "Book status updated successfully.\n";
+        }
+
+
+        void delete_book(string title){
+            int index= 0;
+            int size = library_books.size();
+            while(index < size && library_books[index].print_title() != title ) index++;
+            if(index< size) library_books.erase(library_books.begin() + index);
+
+            ifstream file_in("dataset/books.csv");
+
+            ostringstream updated_data;
+            string line, word;
+            bool found = false;
+
+            // Read and keep the header line
+            getline(file_in, line);
+            updated_data << line << "\n";
+
+            // Process each row
+            while (getline(file_in, line)) {
+                stringstream ss(line);
+                vector<string> columns;
+                
+                while (getline(ss, word, ',')) {
+                    columns.push_back(word);
+                }
+
+                if (columns.size() >= 6 && columns[0] == title) {
+                    found =true;
+                    continue;
+                }
+
+                // Reconstruct the modified row
+                for (size_t i = 0; i < columns.size(); ++i) {
+                    updated_data << columns[i]<<",";
+                }
+                updated_data << "\n";
+            }
+
+            file_in.close();
+
+            if (!found) {
+                cout << "Book with Title " << title << " not found!" << endl;
+                return;
+            }
+
+            // Write back updated data
+            ofstream file_out("dataset/books.csv", ios::trunc);
+            file_out << updated_data.str();
+            file_out.close();
+
+            cout << "Book removed successfully.\n";
+        }
 
 
         void return_book(int roll_no, const string& book_title, const string& isbn,const int& days) {
+            bool found  = false;
+            vector<string> filenames = {"dataset/students.csv","dataset/faculties.csv"};
+            for (const string& filename : filenames) {
+                ifstream file_in(filename);
+               
+
+                vector<string> lines;
+                string line, roll;
+                bool file_found = false; 
+                getline(file_in,line);
+
+                while (getline(file_in, line)) {
+                    stringstream ss(line);
+                    getline(ss, roll, ','); // Extract roll number
+
+                    if (stoi(roll) == roll_no) {
+                        file_found = true; // Mark that the roll was found in this file
+                        found = true; // Mark that the roll was found in any file
+                        line+=book_title;
+                        line+=",";
+                    } 
+                        lines.push_back(line); // Keep other lines
+                    
+                }
+                file_in.close();
+
+                // If roll number was found in this file, update the file
+                if (file_found) {
+                    ofstream file_out(filename, ios::trunc);
+                    for (const string& l : lines) {
+                        file_out << l << "\n";
+                    }
+                    file_out.close();
+                }
+            }
+
+
+
+
+
+
+
+
+
+
             // Update user_books.csv
-            ifstream file_in("distributed_books.csv");
+            ifstream file_in("dataset/distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
-            bool found = false;
+            found = false;
         
             getline(file_in, line);
             updated_data << line << "\n";  // Keep header
@@ -630,12 +968,12 @@ class Library{
                 return;
             }
         
-            ofstream file_out("distributed_books.csv", ios::trunc);
+            ofstream file_out("dataset/distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
             // Update books.csv
-            ifstream book_file("books.csv");
+            ifstream book_file("dataset/books.csv");
             ostringstream book_data;
             string title, book_isbn, author, year, publisher, status;
             bool book_updated = false;
@@ -663,7 +1001,7 @@ class Library{
             book_file.close();
         
             if (book_updated) {
-                ofstream book_out("books.csv", ios::trunc);
+                ofstream book_out("dataset/books.csv", ios::trunc);
                 book_out << book_data.str();
                 book_out.close();
                 cout << "Book returned successfully." << endl;
@@ -671,10 +1009,58 @@ class Library{
                 cout << "Error: Book not found or already available." << endl;
             }
         }
-        
+
+        void output_remove_user(string roll_to_delete){
+            bool found = false;
+            vector<string> filenames = {"dataset/students.csv","dataset/faculties.csv","dataset/librarian.csv"};
+            for (const string& filename : filenames) {
+                ifstream file_in(filename);
+                if (!file_in) {
+                    cerr << "Error: Cannot open file " << filename << endl;
+                    continue;
+                }
+
+                vector<string> lines;
+                string line, roll;
+                bool file_found = false; 
+                getline(file_in,line);
+
+                while (getline(file_in, line)) {
+                    stringstream ss(line);
+                    getline(ss, roll, ','); // Extract roll number
+
+                    if (roll == roll_to_delete) {
+                        file_found = true; // Mark that the roll was found in this file
+                        found = true; // Mark that the roll was found in any file
+                    } else {
+                        lines.push_back(line); // Keep other lines
+                    }
+                }
+                file_in.close();
+
+                // If roll number was found in this file, update the file
+                if (file_found) {
+                    ofstream file_out(filename, ios::trunc);
+                    for (const string& l : lines) {
+                        file_out << l << "\n";
+                    }
+                    file_out.close();
+                }
+            }
+
+            if (!found) {
+                cout << "ROll Not Found " << endl;
+            } else {
+                cout << "User with roll " << roll_to_delete << " removed" << endl;
+            }
+        }
         
 
-};
+
+        
+    
+
+    };
 
 
 
