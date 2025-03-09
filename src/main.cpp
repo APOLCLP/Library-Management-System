@@ -685,7 +685,7 @@ int main(){
 
 
                     RESERVE :
-                        searched_book->status = searched_book->status == "Reserved" ? "Availaible": "Reserved";
+                        searched_book->status = searched_book->status == "Reserved" ? "Available": "Reserved";
                         L.change_stats(searched_book->status,book_title);
                         cout << "\n Do you want to manage any other book ? Y/n"<<endl <<"      ---";
                         yesno = take("char").first;
@@ -775,6 +775,7 @@ int main(){
 
                             if(countDigits(user_roll)==digit_roll_St){
                                St1 = (L.find_student(user_roll));
+                               if(St1 ==nullptr)  L.output_remove_user(to_string(user_roll));
                                if(St1->number_books_borrowed() > 0){
                                     cout << "The User hasn't returned all his borrowed books, so , can't be removed.";
                                     goto EXIT;

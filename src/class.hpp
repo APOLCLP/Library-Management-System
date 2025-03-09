@@ -321,7 +321,7 @@ class Library{
         string line, roll, id, password,days,access_key,history;
     
         // --- Process students.csv ---
-        ifstream file("dataset/students.csv");
+        ifstream file("../dataset/students.csv");
         if (!file) {
             cout << "Error opening students.csv" << endl;
             return;
@@ -368,7 +368,7 @@ class Library{
         file.close();
     
         // --- Process faculties.csv ---
-        ifstream file8("dataset/faculties.csv");
+        ifstream file8("../dataset/faculties.csv");
         if (!file8) {
             cout << "Error opening faculties.csv" << endl;
             return;
@@ -409,7 +409,7 @@ class Library{
         }
         file8.close();
 
-        ifstream file9("dataset/librarian.csv");
+        ifstream file9("../dataset/librarian.csv");
         if (!file9) {
             cout << "Error opening librarian.csv" << endl;
             return;
@@ -434,7 +434,7 @@ class Library{
         file9.close();
     
         // --- Process books.csv ---
-        ifstream file1("dataset/books.csv");
+        ifstream file1("../dataset/books.csv");
         if (!file1) {
             cerr << "Error opening books.csv" << endl;
             return;
@@ -460,7 +460,7 @@ class Library{
         file1.close();
     
         // --- Process distributed_books.csv (borrowed_books) ---
-        ifstream file2("dataset/distributed_books.csv");
+        ifstream file2("../dataset/distributed_books.csv");
         if (!file2) {
             cerr << "Error opening distributed_books.csv" << endl;
             return;
@@ -618,7 +618,7 @@ class Library{
 
         
         void output_data_register(int roll_no, string new_ID, string new_password) {
-            ifstream file_in("dataset/students.csv");
+            ifstream file_in("../dataset/students.csv");
             ostringstream updated_data;
             string line, roll;
             bool updated = false;
@@ -636,14 +636,14 @@ class Library{
             file_in.close();
         
             if (updated) {
-                ofstream("dataset/students.csv") << updated_data.str();
+                ofstream("../dataset/students.csv") << updated_data.str();
                 cout << "Account registered successfully." << endl;
             }
         }
 
        
         void borrow_book(int roll_no, const string& book_title, const string& isbn,int days) {
-            ifstream file_in("dataset/distributed_books.csv");
+            ifstream file_in("../dataset/distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
             bool found = false, book_updated = false;
@@ -689,12 +689,12 @@ class Library{
             }
         
             // Rewrite the file with updated data
-            ofstream file_out("dataset/distributed_books.csv", ios::trunc);
+            ofstream file_out("../dataset/distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
             // Update book status in books.csv (this part is unchanged)
-            ifstream book_file("dataset/books.csv");
+            ifstream book_file("../dataset/books.csv");
             ostringstream book_data;
             string title, book_isbn, author, year, publisher, status;
         
@@ -721,14 +721,14 @@ class Library{
             book_file.close();
         
             if (book_updated) {
-                ofstream book_out("dataset/books.csv", ios::trunc);
+                ofstream book_out("../dataset/books.csv", ios::trunc);
                 book_out << book_data.str();
                 book_out.close();
                 cout << "Book borrowed successfully." << endl;
             }
         }
         void output_add_student(int roll){
-            ofstream file("dataset/students.csv", ios::app); // Open file in append mode
+            ofstream file("../dataset/students.csv", ios::app); // Open file in append mode
 
         
             file << to_string(roll)<<",,,\n";
@@ -736,7 +736,7 @@ class Library{
             cout << "User added successfully.\n";
         }
         void output_add_faculty(int roll,string id,string password){
-            ofstream file("dataset/faculties.csv", ios::app); // Open file in append mode
+            ofstream file("../dataset/faculties.csv", ios::app); // Open file in append mode
 
         
             file << to_string(roll)<<","<<id<<","<<password<<",\n";
@@ -744,7 +744,7 @@ class Library{
             cout << "User added successfully.\n";
         }
         void output_add_librarian(int roll,string key){
-            ofstream file("dataset/librarian.csv", ios::app); // Open file in append mode
+            ofstream file("../dataset/librarian.csv", ios::app); // Open file in append mode
 
         
             file << to_string(roll)<<","<<key<<",\n";
@@ -768,7 +768,7 @@ class Library{
             library_books.push_back(B);
 
 
-            ofstream file("dataset/books.csv", ios::app); // Open file in append mode
+            ofstream file("../dataset/books.csv", ios::app); // Open file in append mode
 
         
             file << title<<","<<ISBN<<","<<author<<","<<published_year<<","<<publisher<<","<<status<<",\n"; // Append a new line
@@ -778,7 +778,7 @@ class Library{
         }
 
         void change_stats(string stats,string title ){
-            ifstream file_in("dataset/books.csv");
+            ifstream file_in("../dataset/books.csv");
 
             ostringstream updated_data;
             string line, word;
@@ -817,7 +817,7 @@ class Library{
             }
 
             // Write back updated data
-            ofstream file_out("dataset/books.csv", ios::trunc);
+            ofstream file_out("../dataset/books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
 
@@ -831,7 +831,7 @@ class Library{
             while(index < size && library_books[index].print_title() != title ) index++;
             if(index< size) library_books.erase(library_books.begin() + index);
 
-            ifstream file_in("dataset/books.csv");
+            ifstream file_in("../dataset/books.csv");
 
             ostringstream updated_data;
             string line, word;
@@ -870,7 +870,7 @@ class Library{
             }
 
             // Write back updated data
-            ofstream file_out("dataset/books.csv", ios::trunc);
+            ofstream file_out("../dataset/books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
 
@@ -880,15 +880,17 @@ class Library{
 
         void return_book(int roll_no, const string& book_title, const string& isbn,const int& days) {
             bool found  = false;
-            vector<string> filenames = {"dataset/students.csv","dataset/faculties.csv"};
+            bool file_found = false; 
+            vector<string> filenames = {"../dataset/students.csv","../dataset/faculties.csv"};
             for (const string& filename : filenames) {
                 ifstream file_in(filename);
                
 
                 vector<string> lines;
                 string line, roll;
-                bool file_found = false; 
+                
                 getline(file_in,line);
+                lines.push_back(line);
 
                 while (getline(file_in, line)) {
                     stringstream ss(line);
@@ -925,7 +927,7 @@ class Library{
 
 
             // Update user_books.csv
-            ifstream file_in("dataset/distributed_books.csv");
+            ifstream file_in("../dataset/distributed_books.csv");
             ostringstream updated_data;
             string line, roll;
             found = false;
@@ -968,12 +970,12 @@ class Library{
                 return;
             }
         
-            ofstream file_out("dataset/distributed_books.csv", ios::trunc);
+            ofstream file_out("../dataset/distributed_books.csv", ios::trunc);
             file_out << updated_data.str();
             file_out.close();
         
             // Update books.csv
-            ifstream book_file("dataset/books.csv");
+            ifstream book_file("../dataset/books.csv");
             ostringstream book_data;
             string title, book_isbn, author, year, publisher, status;
             bool book_updated = false;
@@ -1001,7 +1003,7 @@ class Library{
             book_file.close();
         
             if (book_updated) {
-                ofstream book_out("dataset/books.csv", ios::trunc);
+                ofstream book_out("../dataset/books.csv", ios::trunc);
                 book_out << book_data.str();
                 book_out.close();
                 cout << "Book returned successfully." << endl;
@@ -1012,7 +1014,8 @@ class Library{
 
         void output_remove_user(string roll_to_delete){
             bool found = false;
-            vector<string> filenames = {"dataset/students.csv","dataset/faculties.csv","dataset/librarian.csv"};
+            vector<string> filenames = {"../dataset/students.csv","../dataset/faculties.csv","../dataset/librarian.csv"};
+            bool file_found = false;
             for (const string& filename : filenames) {
                 ifstream file_in(filename);
                 if (!file_in) {
@@ -1022,8 +1025,9 @@ class Library{
 
                 vector<string> lines;
                 string line, roll;
-                bool file_found = false; 
+                 
                 getline(file_in,line);
+                lines.push_back(line);
 
                 while (getline(file_in, line)) {
                     stringstream ss(line);
@@ -1046,6 +1050,7 @@ class Library{
                     }
                     file_out.close();
                 }
+                
             }
 
             if (!found) {
