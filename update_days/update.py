@@ -54,7 +54,7 @@ def update_days_borrowed(csv_file, last_run_date_file):
 
 # Specify the CSV file and the last run date file
 current_dir = os.path.dirname(os.path.abspath(__file__))
-csv_file = os.path.join('dataset/distributed_books.csv')
+csv_file = os.path.join('../dataset/distributed_books.csv')
 last_run_date_file = os.path.join(current_dir, 'last_run_date.txt')
 
 # Run the update function
