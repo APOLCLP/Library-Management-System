@@ -258,11 +258,11 @@ int main(){
             //updation will start now
             BORROW:
                 //overdue = St1->check_overdues();
-                if(St1->fine())cout << "\nYou haven't returned your overdue book and paid your overdues fine yet. Do u want to return now ? Y/n"<< endl <<"      ---";
+                if(St1->fine()){cout << "\nYou haven't returned your overdue book and paid your overdues fine yet. Do u want to return now ? Y/n"<< endl <<"      ---";
                 yesno = take("char").first;
                 if(yesno == 'Y'|| yesno =='y')goto RETURN;
                 else {cout << "You have to first clear your dues to borrow any other book.\n";
-                    goto EXIT;}
+                    goto EXIT;}}
                 cout << "\nDo You want to see the list of books available ? Y/n"<< endl <<"      ---";
                 yesno = take("char").first;
                 if(yesno == 'Y'|| yesno =='y'){
@@ -460,11 +460,11 @@ int main(){
                 }
             //updation will start now
             FBORROW:
-                if(Fc1->fine())cout << "\nYou haven't returned your overdue book for over 60 days. Do u want to return now ? Y/n"<< endl <<"      ---";
+                if(Fc1->fine()){cout << "\nYou haven't returned your overdue book for over 60 days. Do u want to return now ? Y/n"<< endl <<"      ---";
                 yesno = take("char").first;
                 if(yesno == 'Y'|| yesno =='y')goto RETURN;
                 else {cout << "You have to first return book/s to borrow any other book.\n";
-                    goto EXIT;}
+                    goto EXIT;}}
                 
                 cout << "\nDo You want to see the list of books available ? Y/n"<< endl <<"      ---";
                 yesno = take("char").first;
