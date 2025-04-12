@@ -1,25 +1,64 @@
-# Library-Management-System using Object-Oriented Programming (OOP)
- This system  demonstrates key OOP principles such as abstraction, inheritance, polymorphism, and encapsulation to manage the operations of a library effectively.
+Library Management System (LMS)
+A C++ project demonstrating core Object-Oriented Programming (OOP) principles—abstraction, inheritance, polymorphism, and encapsulation—to manage library operations effectively.​
 
+📁 Project Structure
+src/: Contains the main application logic.​
 
+main.cpp: Entry point of the application.​
 
-READ THIS BEFORE using ---
+class.hpp: Defines all classes and their attributes.​
 
-docs---
-Read the "Library-guide" before using.
+dataset/: Holds real data files used by the system.​
 
-datset---
-real datafiles.
+docs/: Includes documentation. Start with Library-guide for usage instructions.​
 
-src----
-Run "main.cpp" for using the system.
--"class.hpp" contains all the classes and attributes.
+update_days/: Manages borrowing durations.​
 
+updat.py: Updates the number of days books have been borrowed.​
 
-update_days---
-Run this "updat.py" for updating the days borrowed with real time.
---"last_run_date.txt" stores the last run date.
+last_run_date.txt: Records the last date the update script was executed.​
 
+🚀 Getting Started
+Clone the repository:
 
+bash
+Copy
+Edit
+git clone https://github.com/APOLCLP/Library-Management-System.git
+Navigate to the project directory:
 
+bash
+Copy
+Edit
+cd Library-Management-System
+Compile the application:
 
+bash
+Copy
+Edit
+g++ src/main.cpp -o lms
+Run the application:
+
+bash
+Copy
+Edit
+./lms
+Update borrowing durations:
+
+bash
+Copy
+Edit
+python3 update_days/updat.py
+📚 Usage
+Before using the system, read the Library-guide in the docs/ directory for detailed instructions.​
+
+Ensure the dataset/ directory contains the necessary data files.​
+
+Run updat.py periodically to keep borrowing durations up to date.​
+
+🛠️ Features
+User-friendly interface for managing library operations.​
+
+Efficient tracking of borrowed books and their durations.​
+
+Modular codebase demonstrating best practices in OOP.
